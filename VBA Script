@@ -1,0 +1,126 @@
+Sub stock_analysis():
+
+    'Declaring variables
+    Dim lastRow As Long
+    Dim totalVolume As LongLong
+    Dim openPrice As Double
+    Dim closePrice As Double
+    Dim ticker As String
+    Dim dollarsChange As Double
+    Dim percentChange As Double
+    Dim summaryRow As Integer
+    
+    'Bonus Variables
+    Dim greatestIncrease As Double
+    Dim greatestIncreaseticker As String
+    Dim greatestDecrease As Double
+    Dim greatestDeceaseticker As String
+    Dim greatestTotalVolume As LongLong
+    Dim greatestTotalVolumeticker As String
+    
+    
+    'Will make all ranges in this for loop with ws. infront of cells
+    For Each ws In Worksheets
+        ws.Activate
+    
+        'Set variables as needed
+        lastRow = Cells(Rows.Count, 1).End(xlUp).Row
+        lastrowk = Cells(Rows.Count, 11).End(xlUp).Row
+        openPrice = Cells(2, 3).Value
+        summaryRow = 2
+        totalVolume = 0
+
+        'Add column titles for requested info
+ 
+        Range("I1").Value = "Ticker"
+        Range("J1").Value = "Yearly Change"
+        Range("K1").Value = "Percent Change"
+        Range("L1").Value = "Total Stock Volume"
+        
+        'Bonus column info
+        Range("P1").Value = "Ticker"
+        Range("Q1").Value = "Value"
+        Range("O2").Value = "Greatest % Increase"
+        Range("O3").Value = "Greatest % Decrease"
+        Range("O4").Value = "Greatest Total Volume"
+    
+
+    
+        'Loop through every row with change in data
+        For currentRow = 2 To lastRow
+            'Storing and adding volume from each cell until if statement excutes
+            totalVolume = totalVolume + Cells(currentRow, 7)
+            'Pulling info for different ticker values
+            If Cells(currentRow + 1, 1).Value <> Cells(currentRow, 1).Value Then
+                ticker = Cells(currentRow, 1).Value
+                closedprice = Cells(currentRow, 6).Value
+                dollarsChange = closedprice - openPrice
+                percentChange = dollarsChange / openPrice
+                
+                'Add info collected into added columns
+                Cells(summaryRow, 9).Value = ticker
+                Cells(summaryRow, 10).Value = dollarsChange
+                Cells(summaryRow, 11).Value = percentChange
+                Cells(summaryRow, 12).Value = totalVolume
+                
+                'Change color of cell to red/green on neg or pos
+                If dollarsChange >= 0 Then
+                    Cells(summaryRow, 10).Interior.ColorIndex = 4
+                Else
+                    Cells(summaryRow, 10).Interior.ColorIndex = 3
+                End If
+                
+                 ' Check bonus values
+                If percentChange > greatestIncrease Then
+                    greatestIncrease = percentChange
+                    greatestIncreaseticker = ticker
+                End If
+                
+                If percentChange < greatestDecrease Then
+                    greatestDecrease = percentChange
+                    greatestDeceaseticker = ticker
+                End If
+                
+                If totalVolume > greatestTotalVolume Then
+                    greatestTotalVolume = totalVolume
+                    greatestTotalVolumeticker = ticker
+                End If
+
+                
+                
+                'Increment summaryrow
+                summaryRow = summaryRow + 1
+                
+                'Make open price move to the next ticker change open price
+                openPrice = Cells(currentRow + 1, 3).Value
+                
+                'Reseting total volume for next ticker range count
+                totalVolume = 0
+           End If
+                
+        Next currentRow
+        
+       
+
+        'Format column Percent Change into pertcentage
+        Range("k2:k" & lastrowk).NumberFormat = "0.00%"
+        
+
+        
+         'Add bonus cells values
+        Range("P2").Value = greatestIncreaseticker
+        Range("Q2").Value = greatestIncrease
+        Range("P3").Value = greatestDeceaseticker
+        Range("Q3").Value = greatestDecrease
+        Range("P4").Value = greatestTotalVolumeticker
+        Range("Q4").Value = greatestTotalVolume
+        
+        'Format column values for bonus to percent
+        Range("q2:q3").NumberFormat = "0.00%"
+    
+        'Autofit Added Columns to text length
+        ActiveSheet.UsedRange.EntireColumn.AutoFit
+    'To the next worksheet in excel
+    Next ws
+
+End Sub
